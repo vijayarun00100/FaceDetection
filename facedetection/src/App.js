@@ -3,6 +3,7 @@ import Navigation from './navigation/navigation';
 import Logo from './logo/logo';
 import Link from './imagelink/imagelink';
 import Rank from './rank/rank';
+import Detection from './detection/detection';
 import 'tachyons';
 import React from 'react';
 
@@ -42,13 +43,35 @@ return requestOptions;
 }
 
 
+
 class App extends React.Component {
   constructor(){
     super();
     this.state = {
       input:'',
+      imageurl:'',
+      box:'',
     }
   }
+
+  calculatebox = (data) =>{
+    const value = data.outputs[0].data.regions[0].region_info.bounding_box;
+    const image = document.getElementById('inputimage');
+    const width = Number(image.width);
+    const height = Number(image.height);
+    return{
+      leftCol : value.left_col * width,
+      topRow : value.top_row * height,
+      rightCol : width - (value.right_col * width),
+      bottomRow : height - (value.bottom_row * height),
+    }
+  }
+
+  drawbox = (coordinates) => {
+    this.setState({box : coordinates});
+    console.log(coordinates);
+  }
+
 
   OnInput = (event) => {
     console.log(event.target.value);
@@ -58,11 +81,13 @@ class App extends React.Component {
   OnButton = () => {
     console.log("click");
     console.log(this.state.input);
+    this.setState({imageurl:this.state.input});
     fetch("https://api.clarifai.com/v2/models/" + 'face-detection' + "/outputs", returnClarifai(this.state.input))
         .then(response => response.json())
-        .then(data => console.log(data))
+        .then(data =>this.drawbox(this.calculatebox(data)))
   }
 
+  
   render() {
   return(
     <div className="App">
@@ -70,6 +95,7 @@ class App extends React.Component {
     <Logo />
     <Rank />
     <Link OnInput={this.OnInput} OnButton={this.OnButton}/>
+    <Detection box={this.state.box} ImageURL={this.state.imageurl}/>
     </div>
     )
   };
