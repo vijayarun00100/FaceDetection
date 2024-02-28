@@ -78,13 +78,30 @@ class App extends React.Component {
     this.setState({ input: event.target.value });
   }
 
+  error = (val) => {
+    return{leftCol : val,
+    topRow : 0,
+    rightCol : 0,
+    bottomRow : 0,}
+  }
+
   OnButton = () => {
     console.log("click");
     console.log(this.state.input);
     this.setState({imageurl:this.state.input});
     fetch("https://api.clarifai.com/v2/models/" + 'face-detection' + "/outputs", returnClarifai(this.state.input))
         .then(response => response.json())
-        .then(data =>this.drawbox(this.calculatebox(data)))
+        .then(data =>{
+          this.drawbox(this.calculatebox(data));
+          const dat = document.getElementsByClassName("detect_area")[0];
+          dat.style.position = "absolute";
+        })
+        .catch(err => {
+          this.setState({box : this.error(0)});
+          console.log("prediction: not a human!");
+          const dat = document.getElementsByClassName("detect_area")[0];
+          dat.style.position = "relative";
+        }) 
   }
 
   
