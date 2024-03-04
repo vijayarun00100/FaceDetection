@@ -4,6 +4,8 @@ import Logo from './logo/logo';
 import Link from './imagelink/imagelink';
 import Rank from './rank/rank';
 import Detection from './detection/detection';
+import Signin from './Signin/signin';
+import Register from './register.js/register';
 import 'tachyons';
 import React from 'react';
 
@@ -51,6 +53,8 @@ class App extends React.Component {
       input:'',
       imageurl:'',
       box:'',
+      router:'',
+      Issigned:false,
     }
   }
 
@@ -78,6 +82,8 @@ class App extends React.Component {
     this.setState({ input: event.target.value });
   }
 
+
+
   error = (val) => {
     return{leftCol : val,
     topRow : 0,
@@ -104,15 +110,39 @@ class App extends React.Component {
         }) 
   }
 
-  
+  OnSwitch = (val) => {
+   
+    if(val === 'home'){
+      this.setState({Issigned:true});
+      console.log('signout'+this.state.Issigned)
+    }else{
+      this.setState({Issigned:false});
+    }
+    this.setState({router:val})
+  }
+
+  OnCheck = () => {
+    this.setState({Issigned:true})
+  }
+
   render() {
   return(
     <div className="App">
-    <Navigation />
-    <Logo />
-    <Rank />
-    <Link OnInput={this.OnInput} OnButton={this.OnButton}/>
-    <Detection box={this.state.box} ImageURL={this.state.imageurl}/>
+      <Navigation OnSwitch={this.OnSwitch} Issigned={this.state.Issigned}/>
+      {this.state.router === 'home' ? 
+      <div>
+        <Logo />
+        <Rank />
+        <Link OnInput={this.OnInput} OnButton={this.OnButton}/>
+        <Detection box={this.state.box} ImageURL={this.state.imageurl}/>
+      </div>
+      :(
+        this.state.router  === 'signin' ? <Signin OnSwitch={this.OnSwitch} /> : <Register OnSwitch={this.OnSwitch} />
+      )
+      }
+    
+    
+    
     </div>
     )
   };
