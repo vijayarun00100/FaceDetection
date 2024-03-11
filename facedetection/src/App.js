@@ -55,7 +55,28 @@ class App extends React.Component {
       box:'',
       router:'',
       Issigned:false,
+      user:{
+        "id":"",
+        "name":"",
+        "email":"",
+        "password":"",
+        "entries":0,
+        "joined":''
+      }
     }
+  }
+
+  loaduser = (data) => {
+    this.setState({
+      user:{
+        "id":data.id,
+        "name":data.name,
+        "email":data.email,
+        "password":data.password,
+        "entries":data.entries,
+        "joined": data.joined
+      }
+    })
   }
 
   calculatebox = (data) =>{
@@ -95,6 +116,25 @@ class App extends React.Component {
     console.log("click");
     console.log(this.state.input);
     this.setState({imageurl:this.state.input});
+    console.log(this.state.user.id);
+    
+    fetch("http://localhost:3000/image",{
+      method:"put",
+      headers:{'content-type':'application/json'},
+      body:
+        JSON.stringify({
+          id:this.state.user.id
+        })
+    }).then(response => response.json()).then(data => {
+      if(data){
+        this.setState({
+          user: {
+              ...this.state.user, // Preserve other properties of user
+              entries: data.entries
+          }
+      });
+      }
+    })
     fetch("https://api.clarifai.com/v2/models/" + 'face-detection' + "/outputs", returnClarifai(this.state.input))
         .then(response => response.json())
         .then(data =>{
@@ -109,7 +149,6 @@ class App extends React.Component {
           dat.style.position = "relative";
         }) 
   }
-
   OnSwitch = (val) => {
    
     if(val === 'home'){
@@ -132,17 +171,15 @@ class App extends React.Component {
       {this.state.router === 'home' ? 
       <div>
         <Logo />
-        <Rank />
+        <Rank entries={this.state.user.entries}/>
         <Link OnInput={this.OnInput} OnButton={this.OnButton}/>
         <Detection box={this.state.box} ImageURL={this.state.imageurl}/>
       </div>
       :(
-        this.state.router  === 'signin' ? <Signin OnSwitch={this.OnSwitch} /> : <Register OnSwitch={this.OnSwitch} />
+        this.state.router  === 'signin' ? <Signin loaduser = {this.loaduser} OnSwitch={this.OnSwitch} /> 
+        : <Register loaduser = {this.loaduser} OnSwitch={this.OnSwitch} />
       )
       }
-    
-    
-    
     </div>
     )
   };
